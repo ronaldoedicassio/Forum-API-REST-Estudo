@@ -96,11 +96,21 @@ public class TopicosController {
 
         // preciso converter o objeto tipo form para topico
         Topico topico = form.converter(cursoRepository);
-        topicoRepository.save(topico);
-        /*
+
+          /*
             Para validar os dados sera utilizado as validações pelo Bean Validation, antes de salvar os dados sera validado
-            pela classe form. Dessa forma iremos manter o codigo mais limpo sem precisar colocar vários if nessa classe.
+            pela classe form. Dessa forma iremos manter o codigo mais limpo sem precisar colocar vários if nessa classe,
+            tornando o codigo menos poluído.
+
+            Para validar as anotações que foram colocadas no form, e necessário utilizar a anotação @Valid, que é do próprio
+            Bean validation para avisa ao spring rodar as validações.
+
+            Dessa forma o spring vai validar os dados que recebe, e vai executar a linha no método cadastrar. Se estiver alguma
+            coisa errada, ele nem vai entrar no método. Ja vai devolver o código 400, que é o coódigo de bad request, que o cliente
+            mandou uma requisição inválida.
          */
+
+        topicoRepository.save(topico);
 
 
         /*

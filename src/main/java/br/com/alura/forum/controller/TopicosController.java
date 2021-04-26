@@ -1,5 +1,6 @@
 package br.com.alura.forum.controller;
 
+import br.com.alura.forum.controller.dto.DetalhesDoTopicoDTO;
 import br.com.alura.forum.controller.dto.TopicoDTO;
 import br.com.alura.forum.controller.form.TopicoForm;
 import br.com.alura.forum.modelo.Topico;
@@ -121,5 +122,15 @@ public class TopicosController {
         URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
         // .buildAndExpand converte o ID para as {}
         return ResponseEntity.created(uri).body(new TopicoDTO(topico));
+    }
+
+    @GetMapping("/{id}")
+    public DetalhesDoTopicoDTO detalhar(@PathVariable Long id) {
+        /*
+            @PathVariable, para dizer que é uma variável do path, da url. E aí o Spring por padrão vai associar.
+            Ele sabe que é para pegar o que veio na url e jogar no parâmetro.
+         */
+        Topico topico = topicoRepository.getOne(id);
+        return new DetalhesDoTopicoDTO(topico);
     }
 }

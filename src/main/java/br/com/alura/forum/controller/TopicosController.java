@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 // @Controller - qdo usar esse precisa colocar ResponseBody no corpo acima do metodo.
@@ -128,13 +129,17 @@ public class TopicosController {
     }
 
     @GetMapping("/{id}")
-    public DetalhesDoTopicoDTO detalhar(@PathVariable Long id) {
+    public ResponseEntity<DetalhesDoTopicoDTO> detalhar(@PathVariable Long id) {
         /*
             @PathVariable, para dizer que é uma variável do path, da url. E aí o Spring por padrão vai associar.
             Ele sabe que é para pegar o que veio na url e jogar no parâmetro.
          */
-        Topico topico = topicoRepository.getOne(id);
-        return new DetalhesDoTopicoDTO(topico);
+        Optional<Topico> topicoOptional = topicoRepository.findById(id);
+        if (topicoOptional.isPresent()) {
+            return ResponseEntity.ok(new DetalhesDoTopicoDTO(topicoOptional.get()));
+            //topico.get():  método get, que é para pegar o método get que é para pegar o tópico de fato que está dentro do optional
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
@@ -162,17 +167,23 @@ public class TopicosController {
             por exemplo, o id. Vou precisar também do tópico repository, porque no form não consigo fazer injeção de dependência,
             e o método vai atualizar e vai me devolver o tópico como parâmetro, como resposta.
          */
-        Topico topico = form.atualizar(id, topicoRepository);
-
-        return ResponseEntity.ok(new TopicoDTO(topico));
+        Optional<Topico> optionalTopico = topicoRepository.findById(id);
+        if (optionalTopico.isPresent()) {
+            Topico topico = form.atualizar(id, topicoRepository);
+            return ResponseEntity.ok(new TopicoDTO(topico));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity remover(@PathVariable long id) {
-        topicoRepository.deleteById(id);
+        Optional<Topico> optionalTopico = topicoRepository.findById(id);
 
-        return ResponseEntity.ok().build();
+        if (optionalTopico.isPresent()) {
+            topicoRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
-
 }

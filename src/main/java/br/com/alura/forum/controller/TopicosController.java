@@ -67,6 +67,7 @@ public class TopicosController {
 
      */
     @PostMapping
+    @Transactional
     public ResponseEntity<TopicoDTO> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) {
 
         /*
@@ -138,7 +139,7 @@ public class TopicosController {
 
     @PutMapping("/{id}")
     @Transactional // para avisar para spring ao final do metodo
-    public ResponseEntity<TopicoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizacaoTopicoForm form){
+    public ResponseEntity<TopicoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizacaoTopicoForm form) {
         /*
             Na url, preciso dizer também qual o recurso que quero utilizar, porque não são todos os tópicos.
             Eu vou passar o id do recurso que quero atualizar, parecido com o que fizemos no detalhar
@@ -165,4 +166,13 @@ public class TopicosController {
 
         return ResponseEntity.ok(new TopicoDTO(topico));
     }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity remover(@PathVariable long id) {
+        topicoRepository.deleteById(id);
+
+        return ResponseEntity.ok().build();
+    }
+
 }

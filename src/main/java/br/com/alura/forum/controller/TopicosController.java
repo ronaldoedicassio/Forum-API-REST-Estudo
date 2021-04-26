@@ -2,6 +2,7 @@ package br.com.alura.forum.controller;
 
 import br.com.alura.forum.controller.dto.DetalhesDoTopicoDTO;
 import br.com.alura.forum.controller.dto.TopicoDTO;
+import br.com.alura.forum.controller.form.AtualizacaoTopicoForm;
 import br.com.alura.forum.controller.form.TopicoForm;
 import br.com.alura.forum.modelo.Topico;
 import br.com.alura.forum.repository.CursoRepository;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -132,5 +134,35 @@ public class TopicosController {
          */
         Topico topico = topicoRepository.getOne(id);
         return new DetalhesDoTopicoDTO(topico);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional // para avisar para spring ao final do metodo
+    public ResponseEntity<TopicoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizacaoTopicoForm form){
+        /*
+            Na url, preciso dizer também qual o recurso que quero utilizar, porque não são todos os tópicos.
+            Eu vou passar o id do recurso que quero atualizar, parecido com o que fizemos no detalhar
+
+            Só que nesse método, além do id, vou precisar dos dados do tópico que quero atualizar. Vou precisar receber
+            um dto com os dados, parecido com o que fizemos no cadastrar. Só que no cadastrar não estávamos usando o padrão
+            de nomenclatura dto. No atualizar também preciso receber, e ele vem no corpo da requisição, e tem que ter validação,
+            porque não posso atualizar com algo inválido
+
+            Mas tem um detalhe. Eu não vou receber um tópico form, porque também posso querer ter flexibilidade. Tem algumas
+            situações em que no cadastro preencho algumas informações, mas na hora de atualizar não posso atualizar todas as
+            informações. Tem um ou outro campo que é somente leitura que não posso atualizar. Se eu receber o mesmo form, podem
+            estar vindo campos que não posso atualizar. No geral, o ideal seria ter outra classe form que representa a atualização.
+            Vou criar outra classe, por exemplo, atualizaçãoTopicoForm, e aqui só vão ter os dados que quero fazer a atualização.
+
+            Nessa lógica, tenho que fazer o seguinte. Está chegando como parâmetro o id do tópico que quero atualizar, então
+            preciso carregá-lo do banco de dados, e aí preciso depois sobrescrever com as informações que foram enviadas pelo
+            usuário, pelo cliente no form. Para não ficar com a lógica no controller, vou encapsular essa lógica dentro da classe
+            form. Eu vou chamar o form.atualizar. Vou ter um método que passo as informações que não consigo ter dentro do form,
+            por exemplo, o id. Vou precisar também do tópico repository, porque no form não consigo fazer injeção de dependência,
+            e o método vai atualizar e vai me devolver o tópico como parâmetro, como resposta.
+         */
+        Topico topico = form.atualizar(id, topicoRepository);
+
+        return ResponseEntity.ok(new TopicoDTO(topico));
     }
 }
